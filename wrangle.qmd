@@ -1,0 +1,98 @@
+---
+title: "Data Wrangle"
+format: html
+editor: visual
+---
+
+### Load Packages
+```{r}
+if (!require(librarian)){
+  install.packages("librarian")
+  library(librarian)
+}
+
+librarian::shelf(tidyverse, here, janitor)
+```
+
+### Loop to Read in Data
+```{r}
+
+filenames <- gsub("\\.csv$","", list.files(here("data")))
+
+for(i in filenames){
+  assign(i, read_csv(here("data", paste(i, ".csv", sep=""))))
+}
+
+
+```
+
+### Clean `pep_kira` - `visit`
+```{r}
+
+clean_visit <- pep_kira %>% 
+  clean_names() %>% 
+  select(!c(created_at:geometry))
+  
+
+```
+
+### Clean `pep_kira_description` - `survey`
+```{r}
+
+clean_survey <- pep_kira_description %>% 
+  clean_names() %>% 
+  select(!c(fulcrum_record_id:updated_by, photos_desc:photos_desc_url))
+  
+
+```
+
+### Clean `pep_kira_description_amphibian_capture` - `capture`
+```{r}
+
+clean_capture <- pep_kira_description_amphibian_capture %>% 
+  clean_names() %>% 
+  select(!c(fulcrum_record_id:updated_by, fulcrum_id))
+
+```
+
+### Clean `pep_kira_description_animal_counts` - `VES`
+```{r}
+
+clean_ves <- pep_kira_description_animal_counts %>% 
+  clean_names() %>% 
+  select(!c(fulcrum_record_id:updated_by, fulcrum_id))
+
+```
+
+### Join all tables together - `fulcrum_id` = `fulcrum_parent_id`
+#### `visit` to `survey`
+```{r}
+
+clean_vis_sur <- clean_visit %>% 
+  left_join(clean_survey, by = c("fulcrum_id" = "fulcrum_parent_id")) %>% 
+  select(!c(fulcrum_id)) %>% 
+  rename(fulcrum_id = fulcrum_id.y)
+  
+
+```
+
+#### `Capture` data
+```{r}
+
+capture_data <- clean_vis_sur %>% 
+  left_join(clean_capture, by = c("fulcrum_id" = "fulcrum_parent_id")) %>% 
+  select(!c(fulcrum_id)) %>% 
+  filter(!visit_date <= "2023-07-01") #remove all data before July
+
+
+```
+
+#### `VES` data
+```{r}
+
+ves_data <- clean_vis_sur %>% 
+  left_join(clean_ves, by = c("fulcrum_id" = "fulcrum_parent_id")) %>% 
+  select(!c(fulcrum_id)) %>% 
+  filter(!visit_date <= "2023-07-01") #remove all data before July
+
+```

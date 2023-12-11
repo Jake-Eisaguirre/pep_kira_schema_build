@@ -17,10 +17,10 @@ librarian::shelf(tidyverse, here, janitor)
 ### Loop to Read in Data
 ```{r}
 
-filenames <- gsub("\\.csv$","", list.files(here("data")))
+filenames <- gsub("\\.csv$","", list.files(here("data", "raw")))
 
 for(i in filenames){
-  assign(i, read_csv(here("data", paste(i, ".csv", sep=""))))
+  assign(i, read_csv(here("data", "raw", paste(i, ".csv", sep=""))))
 }
 
 
@@ -31,8 +31,10 @@ for(i in filenames){
 
 clean_visit <- pep_kira %>% 
   clean_names() %>% 
-  select(!c(created_at:geometry))
+  select(!c(created_at:geometry)) %>% 
+  rename(visit_id = fulcrum_id)
   
+write_csv(clean_visit, here("data", "clean", "visit.csv"))
 
 ```
 
@@ -41,8 +43,12 @@ clean_visit <- pep_kira %>%
 
 clean_survey <- pep_kira_description %>% 
   clean_names() %>% 
-  select(!c(fulcrum_record_id:updated_by, photos_desc:photos_desc_url))
+  select(!c(fulcrum_record_id:updated_by, photos_desc:photos_desc_url)) %>% 
+  rename(visit_id = fulcrum_parent_id,
+         survey_id = fulcrum_id)
   
+
+write_csv(clean_survey, here("data", "clean", "survey.csv"))
 
 ```
 
@@ -51,7 +57,11 @@ clean_survey <- pep_kira_description %>%
 
 clean_capture <- pep_kira_description_amphibian_capture %>% 
   clean_names() %>% 
-  select(!c(fulcrum_record_id:updated_by, fulcrum_id))
+  select(!c(fulcrum_record_id:updated_by)) %>% 
+  rename(capture_id = fulcrum_id,
+         survey_id = fulcrum_parent_id)
+
+write_csv(clean_capture, here("data", "clean", "capture.csv"))
 
 ```
 
@@ -60,7 +70,11 @@ clean_capture <- pep_kira_description_amphibian_capture %>%
 
 clean_ves <- pep_kira_description_animal_counts %>% 
   clean_names() %>% 
-  select(!c(fulcrum_record_id:updated_by, fulcrum_id))
+  select(!c(fulcrum_record_id:updated_by)) %>% 
+  rename(ves_id = fulcrum_id,
+         survey_id = fulcrum_parent_id)
+
+write_csv(clean_ves, here("data", "clean", "ves.csv"))
 
 ```
 
@@ -69,9 +83,8 @@ clean_ves <- pep_kira_description_animal_counts %>%
 ```{r}
 
 clean_vis_sur <- clean_visit %>% 
-  left_join(clean_survey, by = c("fulcrum_id" = "fulcrum_parent_id")) %>% 
-  select(!c(fulcrum_id)) %>% 
-  rename(fulcrum_id = fulcrum_id.y)
+  left_join(clean_survey, by = c("visit_id")) %>% 
+  select(!c(visit_id))
   
 
 ```
@@ -80,8 +93,8 @@ clean_vis_sur <- clean_visit %>%
 ```{r}
 
 capture_data <- clean_vis_sur %>% 
-  left_join(clean_capture, by = c("fulcrum_id" = "fulcrum_parent_id")) %>% 
-  select(!c(fulcrum_id)) %>% 
+  left_join(clean_capture, by = c("survey_id")) %>% 
+  select(!c(survey_id, capture_id)) %>% 
   filter(!visit_date <= "2023-07-01") #remove all data before July
 
 
@@ -91,8 +104,8 @@ capture_data <- clean_vis_sur %>%
 ```{r}
 
 ves_data <- clean_vis_sur %>% 
-  left_join(clean_ves, by = c("fulcrum_id" = "fulcrum_parent_id")) %>% 
-  select(!c(fulcrum_id)) %>% 
+  left_join(clean_ves, by = c("survey_id")) %>% 
+  select(!c(survey_id, ves_id)) %>% 
   filter(!visit_date <= "2023-07-01") #remove all data before July
 
 ```

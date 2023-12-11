@@ -1,0 +1,73 @@
+---
+title: "db_push"
+format: html
+editor: source
+---
+
+### Load Packages
+```{r}
+if (!require(librarian)){
+  install.packages("librarian")
+  library(librarian)
+}
+
+librarian::shelf(tidyverse, here, janitor, DBI, RPostgres)
+```
+
+### Loop to Read in Data
+```{r}
+
+filenames <- gsub("\\.csv$","", list.files(here("data", "clean")))
+
+for(i in filenames){
+  assign(i, read_csv(here("data", "clean", paste(i, ".csv", sep=""))))
+}
+
+
+```
+
+### connect to `RIBBiTR` database
+```{r}
+
+tryCatch({
+    drv <- dbDriver("Postgres")
+    print("Connecting to Database…")
+    connection <- dbConnect(drv, 
+                 dbname = Sys.getenv("aws_dbname"),
+                 host = Sys.getenv("aws_host"), 
+                 port = Sys.getenv("aws_port"),
+                 user = Sys.getenv("aws_user"), 
+                 password = Sys.getenv("aws_password"),
+                 timezone=NULL)
+    print("Database Connected!")
+    },
+    error=function(cond) {
+            print("Unable to connect to Database.")
+    })
+
+```
+
+### Upload tables
+```{r}
+# remove current schema 
+dbExecute(conn = connection, "DROP SCHEMA kira_pep CASCADE")
+
+# create new empty schema
+dbExecute(connection, "create schema kira_pep")
+
+# set schema path
+dbExecute(connection, "set search_path to kira_pep")
+
+# visit table
+dbWriteTable(connection, 'visit', visit, overwrite=T)
+
+# survey table
+dbWriteTable(connection, 'survey', survey, overwrite=T)
+
+# capture table
+dbWriteTable(connection, 'capture', capture, overwrite=T)
+
+# ves
+dbWriteTable(connection, 'ves', overwrite=T)
+```
+

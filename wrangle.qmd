@@ -93,7 +93,7 @@ clean_vis_sur <- clean_visit %>%
 ```{r}
 
 capture_data <- clean_vis_sur %>% 
-  left_join(clean_capture, by = c("survey_id")) %>% 
+  inner_join(clean_capture, by = c("survey_id")) %>% 
   select(!c(survey_id, capture_id)) %>% 
   filter(!visit_date <= "2023-07-01") #remove all data before July
 
@@ -104,7 +104,7 @@ capture_data <- clean_vis_sur %>%
 ```{r}
 
 ves_data <- clean_vis_sur %>% 
-  left_join(clean_ves, by = c("survey_id")) %>% 
+  inner_join(clean_ves, by = c("survey_id")) %>% 
   select(!c(survey_id, ves_id)) %>% 
   filter(!visit_date <= "2023-07-01") #remove all data before July
 

@@ -68,6 +68,6 @@ dbWriteTable(connection, 'survey', survey, overwrite=T)
 dbWriteTable(connection, 'capture', capture, overwrite=T)
 
 # ves
-dbWriteTable(connection, 'ves', overwrite=T)
+dbWriteTable(connection, 'ves', ves, overwrite=T)
 ```
 

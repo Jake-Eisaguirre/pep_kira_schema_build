@@ -1,10 +1,11 @@
 ---
 title: "Data Wrangle"
 format: html
-editor: visual
+editor: source
 ---
 
 ### Load Packages
+
 ```{r}
 if (!require(librarian)){
   install.packages("librarian")
@@ -15,6 +16,7 @@ librarian::shelf(tidyverse, here, janitor)
 ```
 
 ### Loop to Read in Data
+
 ```{r}
 
 filenames <- gsub("\\.csv$","", list.files(here("data", "raw")))
@@ -27,6 +29,7 @@ for(i in filenames){
 ```
 
 ### Clean `pep_kira` - `visit`
+
 ```{r}
 
 clean_visit <- pep_kira %>% 
@@ -39,6 +42,7 @@ write_csv(clean_visit, here("data", "clean", "visit.csv"))
 ```
 
 ### Clean `pep_kira_description` - `survey`
+
 ```{r}
 
 clean_survey <- pep_kira_description %>% 
@@ -53,6 +57,7 @@ write_csv(clean_survey, here("data", "clean", "survey.csv"))
 ```
 
 ### Clean `pep_kira_description_amphibian_capture` - `capture`
+
 ```{r}
 
 clean_capture <- pep_kira_description_amphibian_capture %>% 
@@ -66,6 +71,7 @@ write_csv(clean_capture, here("data", "clean", "capture.csv"))
 ```
 
 ### Clean `pep_kira_description_animal_counts` - `VES`
+
 ```{r}
 
 clean_ves <- pep_kira_description_animal_counts %>% 
@@ -79,7 +85,9 @@ write_csv(clean_ves, here("data", "clean", "ves.csv"))
 ```
 
 ### Join all tables together - `fulcrum_id` = `fulcrum_parent_id`
+
 #### `visit` to `survey`
+
 ```{r}
 
 clean_vis_sur <- clean_visit %>% 
@@ -90,6 +98,7 @@ clean_vis_sur <- clean_visit %>%
 ```
 
 #### `Capture` data
+
 ```{r}
 
 capture_data <- clean_vis_sur %>% 
@@ -101,6 +110,7 @@ capture_data <- clean_vis_sur %>%
 ```
 
 #### `VES` data
+
 ```{r}
 
 ves_data <- clean_vis_sur %>% 

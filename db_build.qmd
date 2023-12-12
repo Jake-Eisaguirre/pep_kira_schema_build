@@ -42,7 +42,32 @@ dbExecute(connection, "set search_path = 'kira_pep';")
 ### Build Relationships
 ```{r}
 
+# visit table
+dbExecute(connection, "alter table visit add primary key(visit_id);")
 
 
+# survey table
+dbExecute(connection, "alter table survey add primary key(survey_id);")
+
+dbExecute(connection,
+          "alter table survey  
+           add constraint fk_survey foreign key (visit_id) 
+          references visit (visit_id);")
+
+# ves table
+dbExecute(connection, "alter table ves add primary key(ves_id);")
+
+dbExecute(connection,           
+          "alter table ves  
+          add constraint fk_ves foreign key (survey_id) 
+          references survey (survey_id);")
+
+# capture table
+dbExecute(connection, "alter table capture add primary key(capture_id);")
+
+dbExecute(connection,
+          "alter table capture  
+          add constraint fk_cap foreign key (survey_id) 
+          references survey (survey_id);")
 ```
 

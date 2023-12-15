@@ -69,5 +69,13 @@ dbExecute(connection,
           "alter table capture  
           add constraint fk_cap foreign key (survey_id) 
           references survey (survey_id);")
+
+# bd table
+dbExecute(connection, "alter table bd_results add primary key(bd_swab_id);")
+
+dbExecute(connection,
+          "alter table capture  
+          add constraint fk_bd foreign key (bd_swab_id) 
+          references bd_results (bd_swab_id);")
 ```
 

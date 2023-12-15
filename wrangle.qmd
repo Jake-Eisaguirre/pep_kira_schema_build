@@ -62,6 +62,7 @@ write_csv(clean_survey, here("data", "clean", "survey.csv"))
 
 clean_capture <- pep_kira_description_amphibian_capture %>% 
   clean_names() %>% 
+  filter(!fulcrum_id == "196bbc28-0507-4451-94df-c96b2e3203fd") %>% 
   select(!c(fulcrum_record_id:updated_by)) %>% 
   rename(capture_id = fulcrum_id,
          survey_id = fulcrum_parent_id)

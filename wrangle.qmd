@@ -12,7 +12,7 @@ if (!require(librarian)){
   library(librarian)
 }
 
-librarian::shelf(tidyverse, here, janitor)
+librarian::shelf(tidyverse, here, janitor, lubridate, parsedate)
 ```
 
 ### Loop to Read in Data
@@ -22,7 +22,7 @@ librarian::shelf(tidyverse, here, janitor)
 filenames <- gsub("\\.csv$","", list.files(here("data", "raw")))
 
 for(i in filenames){
-  assign(i, read_csv(here("data", "raw", paste(i, ".csv", sep=""))))
+  assign(i, read_csv(here("data", "raw", paste(i, ".csv", sep="")), col_types = cols()))
 }
 
 
@@ -119,3 +119,18 @@ ves_data <- clean_vis_sur %>%
   filter(!visit_date <= "2023-07-01") #remove all data before July
 
 ```
+
+### Clean bd_table
+```{r}
+
+bd_table <- pep_kira_bd_data %>% 
+  clean_names() %>% 
+  select(!c(site_id, basin)) %>% 
+  rename(qpcr_date = q_pcr,
+         bd_swab_id = swab_id) %>% 
+  mutate_all(~ifelse(is.nan(.), NA, .)) %>% 
+  mutate(qpcr_date = parse_date(qpcr_date))
+  
+write_csv(bd_table, here("data", "clean", "bd_results.csv"))
+```
+

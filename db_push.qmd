@@ -20,7 +20,7 @@ librarian::shelf(tidyverse, here, janitor, DBI, RPostgres)
 filenames <- gsub("\\.csv$","", list.files(here("data", "clean")))
 
 for(i in filenames){
-  assign(i, read_csv(here("data", "clean", paste(i, ".csv", sep=""))))
+  assign(i, read_csv(here("data", "clean", paste(i, ".csv", sep="")), col_types = cols()))
 }
 
 
@@ -69,5 +69,8 @@ dbWriteTable(connection, 'capture', capture, overwrite=T)
 
 # ves
 dbWriteTable(connection, 'ves', ves, overwrite=T)
+
+#bd
+dbWriteTable(connection, 'bd_results', bd_results, overwrite=T)
 ```
 
